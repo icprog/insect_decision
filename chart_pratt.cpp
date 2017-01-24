@@ -49,10 +49,10 @@ ChartPratt::ChartPratt(params_pratt_t *p, QWidget *parent)
     double t;
     QtCharts::QLineSeries *series1 = new QtCharts::QLineSeries();
     QtCharts::QLineSeries *series2 = new QtCharts::QLineSeries();
-    QtCharts::QLineSeries *series_diff = new QtCharts::QLineSeries();
+    //QtCharts::QLineSeries *series_diff = new QtCharts::QLineSeries();
     t = 0.;
     for(int i=0;i<length;i++) {
-        series_diff->append(t,results_y1[i]-results_y2[i]);
+        //series_diff->append(t,results_y1[i]-results_y2[i]);
         series1->append(t,results_y1[i]);
         series2->append(t,results_y2[i]);
         t += params->h;
@@ -61,12 +61,12 @@ ChartPratt::ChartPratt(params_pratt_t *p, QWidget *parent)
     /* set series options */
     series1->setName("Nest A");
     series2->setName("Nest B");
-    series_diff->setName("A-B");
+    //series_diff->setName("A-B");
 
-    QPen diff_pen(QRgb(0xff9933));
-    diff_pen.setWidth(2);
-    diff_pen.setStyle(Qt::DashLine);
-    series_diff->setPen(diff_pen);
+    //QPen diff_pen(QRgb(0xff9933));
+    //diff_pen.setWidth(2);
+    //diff_pen.setStyle(Qt::DashLine);
+    //series_diff->setPen(diff_pen);
 
     /* create chart */
     QtCharts::QChart *chart = new QtCharts::QChart();
@@ -85,26 +85,26 @@ ChartPratt::ChartPratt(params_pratt_t *p, QWidget *parent)
 
     /* activation axis */
     QtCharts::QValueAxis *axisY = new QtCharts::QValueAxis;
-    axisY->setRange(-1.0,1.0);
-    axisY->setTitleText("Activation");
+    axisY->setRange(-1.0,params->population);
+    axisY->setTitleText("Population");
 
     /* region axis */
-    QtCharts::QCategoryAxis *axisY2 = new QtCharts::QCategoryAxis;
-    axisY2->append("Option B Wins", 2);
-    axisY2->append("Option A Wins", 4);
-    axisY2->setRange(0,4);
-    axisY2->setLinePenColor(series_diff->pen().color());
+    //QtCharts::QCategoryAxis *axisY2 = new QtCharts::QCategoryAxis;
+    //axisY2->append("Option B Wins", 2);
+    //axisY2->append("Option A Wins", 4);
+    //axisY2->setRange(0,4);
+    //axisY2->setLinePenColor(series_diff->pen().color());
     //axisY3->setGridLinePen((series->pen()));
 
     /* add axes to chart */
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
-    chart->addAxis(axisY2, Qt::AlignRight);
+    //chart->addAxis(axisY2, Qt::AlignRight);
 
     /* add data */
     chart->addSeries(series1);
     chart->addSeries(series2);
-    chart->addSeries(series_diff);
+    //chart->addSeries(series_diff);
 
     /* attach axes */
     series1->attachAxis(axisX);
@@ -112,8 +112,8 @@ ChartPratt::ChartPratt(params_pratt_t *p, QWidget *parent)
     series2->attachAxis(axisY);
     series2->attachAxis(axisX);
 //    series_diff->attachAxis(axisY2);
-    series_diff->attachAxis(axisY);
-    series_diff->attachAxis(axisX);
+    //series_diff->attachAxis(axisY);
+    //series_diff->attachAxis(axisX);
 
     /* set up vertical layout */
     QVBoxLayout * vlayout;

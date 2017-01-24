@@ -79,12 +79,14 @@ private slots:
     /* simplified pratt model changes to spinboxes */
     void slot_sp_h_changed(double v);
     void slot_sp_d_changed(int v);
+    void slot_sp_population_changed(double v);
     void slot_sp_y1_0_changed(double v);
     void slot_sp_y2_0_changed(double v);
     void slot_sp_q1_changed(double v);
     void slot_sp_q2_changed(double v);
     void slot_sp_r1_changed(double v);
     void slot_sp_l1_changed(double v);
+    void slot_sp_r1_prime_changed(double v);
     void slot_sp_seed_changed(int v);
     void slot_sp_std_dev_changed(double v);
 
