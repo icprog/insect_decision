@@ -1,5 +1,5 @@
-#ifndef CHART_UM_H
-#define CHART_UM_H
+#ifndef CHART_INDIRECT_BRITTON_H
+#define CHART_INDIRECT_BRITTON_H
 
 #include <QApplication>
 #include <QChart>
@@ -14,23 +14,23 @@
 #include <QWidget>
 #include "models.h"
 
-class ChartUM : public QWidget
+class ChartIndirectBritton : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ChartUM(params_um_t *p, QWidget *parent = 0);
+    explicit ChartIndirectBritton(params_indirect_britton_t *p, QWidget *parent = 0);
 
 private:
     /* pointer to parameters */
-    params_um_t *params;
+    params_indirect_britton_t *params;
 
     /* simulation results */
     double * results_y1;
     double * results_y2;
 
-    /* window component: button_box */
+    /* window component: button box */
     QGroupBox *button_box;
-    QPushButton * m_button_close;
+    QPushButton *m_button_close;
 
 signals:
 
@@ -40,4 +40,4 @@ private slots:
     void slot_close();
 };
 
-#endif // CHART_UM_H
+#endif // CHART_INDIRECT_BRITTON_H

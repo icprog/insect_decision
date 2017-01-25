@@ -6,9 +6,6 @@
 ChartUM::ChartUM(params_um_t *p, QWidget *parent)
     : QWidget(parent), params(p)
 {
-    /* make a close button */
-    m_button_close = new QPushButton("close", this);
-
     /* make the window sort of large */
     setFixedSize(1000,600);
 
@@ -97,18 +94,26 @@ ChartUM::ChartUM(params_um_t *p, QWidget *parent)
     series_diff->attachAxis(axisY);
     series_diff->attachAxis(axisX);
 
-    /* set up vertical layout */
-    QVBoxLayout * vlayout;
-    vlayout = new QVBoxLayout;
 
-    QtCharts::QChartView *chartView = new QtCharts::QChartView(chart);
-    chartView->setRenderHint(QPainter::Antialiasing);
+    /* chart view goes on top */
+    QtCharts::QChartView *chart_view = new QtCharts::QChartView(chart);
+    chart_view->setRenderHint(QPainter::Antialiasing);
 
-    vlayout->addWidget(chartView);
-    vlayout->addWidget(m_button_close);
+    /* button box comes next */
+    button_box = new QGroupBox;
+    QHBoxLayout *button_layout = new QHBoxLayout;
+    m_button_close = new QPushButton("close", this);
+    button_layout->addWidget(m_button_close);
+    button_box->setLayout(button_layout);
 
-    this->setLayout(vlayout);
-    this->show();
+    /* assemble window: main layout */
+    QVBoxLayout *main_layout = new QVBoxLayout;
+    main_layout->addWidget(chart_view);
+    main_layout->addWidget(button_box);
+
+    setLayout(main_layout);
+    setWindowTitle(tr("Usher-McClelland Model"));
+    show();
 
     /* wire the signals */
     connect(m_button_close, SIGNAL (clicked()), this, SLOT(slot_close()));

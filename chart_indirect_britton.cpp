@@ -1,9 +1,9 @@
-#include "chart_pratt.h"
+#include "chart_indirect_britton.h"
 
 /* for debugging */
 #include <iostream>
 
-ChartPratt::ChartPratt(params_pratt_t *p, QWidget *parent)
+ChartIndirectBritton::ChartIndirectBritton(params_indirect_britton_t *p, QWidget *parent)
     : QWidget(parent), params(p)
 {
     /* make the window sort of large */
@@ -15,21 +15,17 @@ ChartPratt::ChartPratt(params_pratt_t *p, QWidget *parent)
 
     params->cn_q1 = (double *)malloc(length * sizeof(*(params->cn_q1)));
     params->cn_q2 = (double *)malloc(length * sizeof(*(params->cn_q2)));
-    params->cn_r1 = (double *)malloc(length * sizeof(*(params->cn_r1)));
-    params->cn_r2 = (double *)malloc(length * sizeof(*(params->cn_r2)));
     params->cn_r1_prime = (double *)malloc(length * sizeof(*(params->cn_r1_prime)));
     params->cn_r2_prime = (double *)malloc(length * sizeof(*(params->cn_r2_prime)));
     params->cn_l1 = (double *)malloc(length * sizeof(*(params->cn_l1)));
     params->cn_l2 = (double *)malloc(length * sizeof(*(params->cn_l2)));
 
-    pratt_set_noise(&generator,
+    indirect_britton_set_noise(&generator,
                     0.0,
                     params->std_dev,
                     length,
                     params->cn_q1,
                     params->cn_q2,
-                    params->cn_r1,
-                    params->cn_r2,
                     params->cn_r1_prime,
                     params->cn_r2_prime,
                     params->cn_l1,
@@ -40,7 +36,7 @@ ChartPratt::ChartPratt(params_pratt_t *p, QWidget *parent)
     results_y2 = (double *)malloc(length * sizeof(*results_y2));
 
     // note: function call will set initial conditions
-    pratt_rk4(params, results_y1, results_y2);
+    indirect_britton_rk4(params, results_y1, results_y2);
 
     /* create series to chart */
     double t;
@@ -70,7 +66,7 @@ ChartPratt::ChartPratt(params_pratt_t *p, QWidget *parent)
     QtCharts::QChart *chart = new QtCharts::QChart();
     //chart->legend()->hide();
     chart->legend()->setVisible(true);
-    chart->setTitle("Simplified Pratt (Direct Transfer) Model");
+    chart->setTitle("Simplified Indirect Britton Model");
 
     /* this will animate the series as it is displayed */
     chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
@@ -120,18 +116,16 @@ ChartPratt::ChartPratt(params_pratt_t *p, QWidget *parent)
     main_layout->addWidget(button_box);
 
     setLayout(main_layout);
-    setWindowTitle(tr("Simplified Pratt Model"));
+    setWindowTitle(tr("Simplified Indirect Britton Model"));
     show();
 
     /* wire the signals */
     connect(m_button_close, SIGNAL (clicked()), this, SLOT(slot_close()));
 }
 
-void ChartPratt::slot_close() {
+void ChartIndirectBritton::slot_close() {
     free(params->cn_q1);
     free(params->cn_q2);
-    free(params->cn_r1);
-    free(params->cn_r2);
     free(params->cn_l1);
     free(params->cn_l2);
     free(params->cn_r1_prime);

@@ -6,6 +6,7 @@
 #include <QtCharts/QCategoryAxis>
 #include <QChartView>
 #include <QFlags>
+#include <QGroupBox>
 #include <QLineSeries>
 #include <QPushButton>
 #include <QValueAxis>
@@ -27,8 +28,9 @@ private:
     double * results_y1;
     double * results_y2;
 
-    /* buttons */
-    QPushButton * m_button_close;
+    /* window component: button box */
+    QGroupBox *button_box;
+    QPushButton *m_button_close;
 
 signals:
 

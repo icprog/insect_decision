@@ -27,6 +27,7 @@ private:
     void create_model_box();
     void create_model_box_um();
     void create_model_box_pratt();
+    void create_model_box_indirect_britton();
 
     /* window component: menu bar */
     QMenuBar *menuBar;  /* note: apparently on mac/osx the quit action always defaults to the name of the program */
@@ -34,11 +35,12 @@ private:
     QAction *exitAction;
 
     /* window component: combo menu box for selecting model */
-    enum {MODEL_UM = 0, MODEL_PRATT};
+    enum {MODEL_UM = 0, MODEL_PRATT, MODEL_INDIRECT_BRITTON};
     QGroupBox *combo_menu_box;
     QComboBox *combo_menu;
     QAction *action_um;
     QAction *action_pratt;
+    QAction *action_indirect_britton;
 
     /* window component: button box for actions such as graph or quit */
     QGroupBox *action_box;
@@ -48,10 +50,13 @@ private:
     /* the boxes */
     QGroupBox *model_box_um;    /* the um model box */
     QGroupBox *model_box_pratt; /* the simplified pratt model box */
+    QGroupBox *model_box_indirect_britton;  /* the simplified indirect britton box */
+    //QGroupBox *model_box_direct_britton;
 
     /* model parameters */
     params_um_t params_um;          /* usher-mclelland binary decision */
     params_pratt_t params_pratt;    /* simplified pratt model: social insect, direct switching */
+    params_indirect_britton_t params_indirect_britton;
 
     /* buttons */
     /* Q: should these be defined here or in the action box?
@@ -85,14 +90,33 @@ private slots:
     void slot_sp_q1_changed(double v);
     void slot_sp_q2_changed(double v);
     void slot_sp_r1_changed(double v);
+    void slot_sp_r2_changed(double v);
     void slot_sp_l1_changed(double v);
+    void slot_sp_l2_changed(double v);
     void slot_sp_r1_prime_changed(double v);
+    void slot_sp_r2_prime_changed(double v);
     void slot_sp_seed_changed(int v);
     void slot_sp_std_dev_changed(double v);
+
+    /* simplified indirect britton model changes to spinboxes */
+    void slot_sib_h_changed(double v);
+    void slot_sib_d_changed(int v);
+    void slot_sib_population_changed(double v);
+    void slot_sib_y1_0_changed(double v);
+    void slot_sib_y2_0_changed(double v);
+    void slot_sib_q1_changed(double v);
+    void slot_sib_q2_changed(double v);
+    void slot_sib_l1_changed(double v);
+    void slot_sib_l2_changed(double v);
+    void slot_sib_r1_prime_changed(double v);
+    void slot_sib_r2_prime_changed(double v);
+    void slot_sib_seed_changed(int v);
+    void slot_sib_std_dev_changed(double v);
 
     /* slots for handling the charting of the different models */
     void slot_go_um();
     void slot_go_pratt();
+    void slot_go_indirect_britton();
 
     void slot_model_changed(int);
 };
