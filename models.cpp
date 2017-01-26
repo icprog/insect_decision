@@ -1,6 +1,7 @@
 #include "models.h"
 
 /*****************************************************************************
+ *
  * Usher-McClelland Model
  *
  * Based on Marshall et. al. 2009, equation 4.1
@@ -81,6 +82,7 @@ void usher_mcclelland_rk4(params_um_t *params, double * results_y1, double * res
 }
 
 /*****************************************************************************
+ *
  * Simplified Pratt Model
  *
  * Based on Marshall et. al. 2009, equations 6.1 and 6.2.
@@ -261,6 +263,7 @@ void pratt_rk4(params_pratt_t *params, double * results_y1, double * results_y2)
 }
 
 /*****************************************************************************
+ *
  * Simplified Indirect Britton Model
  *
  * Based on Marshall et. al. 2009, equation 6.3.
@@ -371,6 +374,148 @@ void indirect_britton_rk4(params_indirect_britton_t *params, double * results_y1
                 - ((results_y1[i] + (y1_k3 * params->h)) * (params->l1 + params->cn_l1[i])));
         double y2_k4 = (s*(params->q2 + params->cn_q2[i])
                 + ((results_y2[i] + (y2_k3 * params->h)) * s * (params->r2_prime + params->cn_r2_prime[i]))
+                - ((results_y2[i] + (y2_k3 * params->h)) * (params->l2 + params->cn_l2[i])));
+        /* Euler's method */
+//        results_y1[i+1] = results_y1[i] + (y1_k1 * params->h);
+//        results_y2[i+1] = results_y2[i] + (y2_k1 * params->h);
+        /* RK4 method */
+        results_y1[i+1] = results_y1[i] + (((y1_k1 + 2*y1_k2 + 2*y1_k3 + y1_k4)/6)*params->h);
+        results_y2[i+1] = results_y2[i] + (((y2_k1 + 2*y2_k2 + 2*y2_k3 + y2_k4)/6)*params->h);
+    }
+}
+
+/*****************************************************************************
+ *
+ * Simplified Direct Britton Model
+ *
+ * Based on Marshall et. al. 2009, equation 6.4.
+ *
+ *****************************************************************************/
+
+void direct_britton_set_defaults(params_direct_britton_t *p) {
+    p->h = 0.05;                /* time step */
+    p->d = 10;                  /* duration */
+    p->population = 100;        /* population size */
+    p->y1_0 = 0.0;              /* nest 1 initial size */
+    p->y2_0 = 0.0;              /* nest 2 initial size */
+    p->q1 = 0.4;                /* quality of nest 1 */
+    p->q2 = 0.4;                /* quality of nest 2 */
+    p->r1 = 0.2;
+    p->r2 = 0.2;
+    p->r1_prime = 0.1;          /* rate of recruitment from S to nest 1 */
+    p->r2_prime = 0.1;          /* rate of recruitment from S to nest 2 */
+    p->l1 = 0.2;                /* rate of leaking to S from 1 */
+    p->l2 = 0.2;                /* rate of leaking to S from 2 */
+    p->seed = 3;                /* random number seed */
+    p->std_dev = 0.05;          /* random number std dev */
+    p->cn_q1 = nullptr;         /* quality of nest 1 signal noise */
+    p->cn_q2 = nullptr;         /* quality of nest 2 signal noise */
+    p->cn_r1 = nullptr;
+    p->cn_r2 = nullptr;
+    p->cn_l1 = nullptr;         /* rate of leaking to S from 1 noise */
+    p->cn_l2 = nullptr;         /* rate of leaking to S from 2 noise */
+    p->cn_r1_prime = nullptr;   /* rate of recruitment from S to nest 1 noise */
+    p->cn_r2_prime = nullptr;   /* rate of recruitment from S to nest 2 noise */
+}
+
+/* Fill the noise arrays for the simplified pratt model */
+void direct_britton_set_noise(std::default_random_engine *g,
+                     double mean,
+                     double std_dev,
+                     int length,
+                     double *cn_q1,
+                     double *cn_q2,
+                     double *cn_r1,
+                     double *cn_r2,
+                     double *cn_r1_prime,
+                     double *cn_r2_prime,
+                     double *cn_l1,
+                     double *cn_l2) {
+
+    std::normal_distribution<double> distribution(mean,std_dev);
+
+    for (int i=0; i<length; i++) {
+        cn_q1[i] = distribution(*g);
+    }
+    for (int i=0; i<length; i++) {
+        cn_q2[i] = distribution(*g);
+    }
+    for (int i=0; i<length; i++) {
+        cn_r1[i] = distribution(*g);
+    }
+    for (int i=0; i<length; i++) {
+        cn_r2[i] = distribution(*g);
+    }
+    for (int i=0; i<length; i++) {
+        cn_r1_prime[i] = distribution(*g);
+    }
+    for (int i=0; i<length; i++) {
+        cn_r2_prime[i] = distribution(*g);
+    }
+    for (int i=0; i<length; i++) {
+        cn_l1[i] = distribution(*g);
+    }
+    for (int i=0; i<length; i++) {
+        cn_l2[i] = distribution(*g);
+    }
+}
+
+/*
+ * input:
+ *  total population size
+ *  number in nest 1
+ *  number in nest 2
+ *
+ * output:
+ *  population left in source
+ */
+double direct_britton_s(double total_population, double y1, double y2) {
+    if (total_population-y1-y2 <= 0) return 0.;
+    else return (total_population-y1-y2);
+}
+
+void direct_britton_rk4(params_direct_britton_t *params, double * results_y1, double * results_y2) {
+
+    int length = (int)(params->d/params->h);
+
+    /* set initial conditions */
+    results_y1[0] = params->y1_0;
+    results_y2[0] = params->y2_0;
+
+    int i;
+    for (i=0;i<length-1;i++) {
+        double s = indirect_britton_s(params->population, results_y1[i], results_y2[i]);
+        double y1_k1 = (s*(params->q1 + params->cn_q1[i])
+                + (results_y1[i] * s * (params->r1_prime + params->cn_r1_prime[i]))
+                + (results_y1[i] * results_y2[i] * (params->r1 - params->r2 + params->cn_r1[i] - params->cn_r2[i]))
+                - (results_y1[i] * (params->l1 + params->cn_l1[i])));
+        double y2_k1 = (s*(params->q2 + params->cn_q2[i])
+                + (results_y2[i] * s * (params->r2_prime + params->cn_r2_prime[i]))
+                - (results_y1[i] * results_y2[i] * (params->r1 - params->r2 + params->cn_r1[i] - params->cn_r2[i]))
+                - (results_y2[i] * (params->l2 + params->cn_l2[i])));
+        double y1_k2 = (s*(params->q1 + params->cn_q1[i])
+                + ((results_y1[i] + (y1_k1 * params->h/2)) * s * (params->r1_prime + params->cn_r1_prime[i]))
+                + ((results_y1[i] + (y1_k1 * params->h/2)) * (results_y2[i] + (y2_k1 * params->h/2)) * (params->r1 - params->r2 + params->cn_r1[i] - params->cn_r2[i]))
+                - ((results_y1[i] + (y1_k1 * params->h/2)) * (params->l1 + params->cn_l1[i])));
+        double y2_k2 = (s*(params->q2 + params->cn_q2[i])
+                + ((results_y2[i] + (y2_k1 * params->h/2)) * s * (params->r2_prime + params->cn_r2_prime[i]))
+                - ((results_y1[i] + (y1_k1 * params->h/2)) * (results_y2[i] + (y2_k1 * params->h/2)) * (params->r1 - params->r2 + params->cn_r1[i] - params->cn_r2[i]))
+                - ((results_y2[i] + (y2_k1 * params->h/2)) * (params->l2 + params->cn_l2[i])));
+        double y1_k3 = (s*(params->q1 + params->cn_q1[i])
+                + ((results_y1[i] + (y1_k2 * params->h/2)) * s * (params->r1_prime + params->cn_r1_prime[i]))
+                + ((results_y1[i] + (y1_k2 * params->h/2)) * (results_y2[i] + (y2_k2 * params->h/2)) * (params->r1 - params->r2 + params->cn_r1[i] - params->cn_r2[i]))
+                - ((results_y1[i] + (y1_k2 * params->h/2)) * (params->l1 + params->cn_l1[i])));
+        double y2_k3 = (s*(params->q2 + params->cn_q2[i])
+                + ((results_y2[i] + (y2_k2 * params->h/2)) * s * (params->r2_prime + params->cn_r2_prime[i]))
+                - ((results_y1[i] + (y1_k2 * params->h/2)) * (results_y2[i] + (y2_k2 * params->h/2)) * (params->r1 - params->r2 + params->cn_r1[i] - params->cn_r2[i]))
+                - ((results_y2[i] + (y2_k2 * params->h/2)) * (params->l2 + params->cn_l2[i])));
+        double y1_k4 = (s*(params->q1 + params->cn_q1[i])
+                + ((results_y1[i] + (y1_k3 * params->h)) * s * (params->r1_prime + params->cn_r1_prime[i]))
+                + ((results_y1[i] + (y1_k3 * params->h)) * (results_y2[i] + (y2_k3 * params->h)) * (params->r1 - params->r2 + params->cn_r1[i] - params->cn_r2[i]))
+                - ((results_y1[i] + (y1_k3 * params->h)) * (params->l1 + params->cn_l1[i])));
+        double y2_k4 = (s*(params->q2 + params->cn_q2[i])
+                + ((results_y2[i] + (y2_k3 * params->h)) * s * (params->r2_prime + params->cn_r2_prime[i]))
+                - ((results_y1[i] + (y1_k3 * params->h)) * (results_y2[i] + (y2_k3 * params->h)) * (params->r1 - params->r2 + params->cn_r1[i] - params->cn_r2[i]))
                 - ((results_y2[i] + (y2_k3 * params->h)) * (params->l2 + params->cn_l2[i])));
         /* Euler's method */
 //        results_y1[i+1] = results_y1[i] + (y1_k1 * params->h);

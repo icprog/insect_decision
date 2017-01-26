@@ -12,11 +12,13 @@ SOURCES += \
     models.cpp \
     chart_um.cpp \
     chart_pratt.cpp \
-    chart_indirect_britton.cpp
+    chart_indirect_britton.cpp \
+    chart_direct_britton.cpp
 
 HEADERS += \
     mainwindow.h \
     models.h \
     chart_um.h \
     chart_pratt.h \
-    chart_indirect_britton.h
+    chart_indirect_britton.h \
+    chart_direct_britton.h
