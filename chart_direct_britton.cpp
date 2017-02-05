@@ -11,7 +11,7 @@ ChartDirectBritton::ChartDirectBritton(params_direct_britton_t *p, QWidget *pare
 
     /* populate noise arrays using seed */
     std::default_random_engine generator(params->seed);
-    int length = (int)(params->d/params->h);
+    int length = ceil(params->d/params->h);
 
     params->cn_q1 = (double *)malloc(length * sizeof(*(params->cn_q1)));
     params->cn_q2 = (double *)malloc(length * sizeof(*(params->cn_q2)));
@@ -68,9 +68,8 @@ ChartDirectBritton::ChartDirectBritton(params_direct_britton_t *p, QWidget *pare
 
     /* create chart */
     QtCharts::QChart *chart = new QtCharts::QChart();
-    //chart->legend()->hide();
     chart->legend()->setVisible(true);
-    chart->setTitle("Simplified Direct Britton Model");
+    //chart->setTitle("Simplified Direct Britton Model");
 
     /* this will animate the series as it is displayed */
     chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
@@ -80,11 +79,13 @@ ChartDirectBritton::ChartDirectBritton(params_direct_britton_t *p, QWidget *pare
     /* time axis */
     QtCharts::QValueAxis *axisX = new QtCharts::QValueAxis;
     axisX->setTitleText("Time");
+    axisX->setGridLineVisible(false);
 
     /* activation axis */
     QtCharts::QValueAxis *axisY = new QtCharts::QValueAxis;
     axisY->setRange(-1.0,params->population);
     axisY->setTitleText("Population");
+    axisY->setGridLineVisible(false);
 
     /* add axes to chart */
     chart->addAxis(axisX, Qt::AlignBottom);
@@ -104,19 +105,21 @@ ChartDirectBritton::ChartDirectBritton(params_direct_britton_t *p, QWidget *pare
     source_population->attachAxis(axisY);
 
     /* chart view goes on top */
-    QtCharts::QChartView *chartView = new QtCharts::QChartView(chart);
-    chartView->setRenderHint(QPainter::Antialiasing);
+    chart_view = new QtCharts::QChartView(chart);
+    chart_view->setRenderHint(QPainter::Antialiasing);
 
     /* button box comes next */
     button_box = new QGroupBox;
     QHBoxLayout *button_layout = new QHBoxLayout;
+    m_button_print = new QPushButton("print", this);
     m_button_close = new QPushButton("close", this);
+    button_layout->addWidget(m_button_print);
     button_layout->addWidget(m_button_close);
     button_box->setLayout(button_layout);
 
     /* assemble window: main layout */
     QVBoxLayout *main_layout = new QVBoxLayout;
-    main_layout->addWidget(chartView);
+    main_layout->addWidget(chart_view);
     main_layout->addWidget(button_box);
 
     setLayout(main_layout);
@@ -124,6 +127,7 @@ ChartDirectBritton::ChartDirectBritton(params_direct_britton_t *p, QWidget *pare
     show();
 
     /* wire the signals */
+    connect(m_button_print, SIGNAL (clicked()), this, SLOT(slot_print()));
     connect(m_button_close, SIGNAL (clicked()), this, SLOT(slot_close()));
 }
 
@@ -141,3 +145,22 @@ void ChartDirectBritton::slot_close() {
     this->close();
 }
 
+void ChartDirectBritton::slot_print() {
+    /* create a printer */
+    QPrinter *printer = new QPrinter(QPrinter::HighResolution);
+    //printer->setOrientation(QPrinter::Landscape);
+    QPrintDialog *dialog = new QPrintDialog(printer);
+    dialog->setWindowTitle("Print Chart");
+    if (dialog->exec() != QDialog::Accepted)
+        return;
+
+    /* make a painter to paint onto the pages of the printer */
+    QPainter *painter = new QPainter();
+    painter->begin(printer);
+    painter->setRenderHint(QPainter::Antialiasing);
+    chart_view->render(painter, printer->pageRect());
+    painter->end();
+    delete(dialog);
+    delete(painter);
+    delete(printer);
+}

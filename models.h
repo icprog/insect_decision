@@ -110,11 +110,47 @@ typedef struct params_direct_britton_s {
     double *cn_l2;  /* noise applied to leakage from nest 2 to source */
 } params_direct_britton_t;
 
+/* parameters for gaze model */
+typedef struct params_gaze_s {
+    double h;           /* step size */
+    int d;              /* duration */
+    double y1_0;        /* y1 initial condition (priming)*/
+    double y2_0;        /* y2 initial condition (priming)*/
+    double I1;          /* input to y1 */
+    double I2;          /* input to y2 */
+    double g;           /* maximum gaze input */
+    double gaze_start;  /* start time for gaze */
+    double gaze_end;    /* end time for gaze */
+    double a;           /* y-intercept for linear gaze activation */
+    double l1;          /* decay (leak) for y1 */
+    double l2;          /* decay (leak) for y2 */
+    double w1;          /* inhibition weight from y1 to y2 */
+    double w2;          /* inhibition weight from y2 to y1 */
+    double t1;          /* location of target location 1 */
+    double t2;          /* location of target location 2 */
+    double tg;          /* location of gaze */
+
+    double n_std_dev;   /* standard deviation for noise */
+    double g_std_dev;   /* standard deviation for gaze */
+    int seed;           /* noise seed */
+
+    /* noise arrays */
+    double *n_I1;   /* input I1 noise */
+    double *n_I2;   /* input I2 noise */
+    double *n_w1;   /* weight w1 noise */
+    double *n_w2;   /* weight w2 noise */
+    double *n_g1;   /* noise on gaze input to y1 */
+    double *n_g2;   /* noise on gaze input to y2 */
+    double *n_l1;   /* noise on decay from y1 */
+    double *n_l2;   /* noise on decay from y2 */
+} params_gaze_t;
+
 /* set default parameters */
 void um_set_defaults(params_um_t *p);
 void pratt_set_defaults(params_pratt_t *p);
 void indirect_britton_set_defaults(params_indirect_britton_t *p);
 void direct_britton_set_defaults(params_direct_britton_t *p);
+void gaze_set_defaults(params_gaze_t *p);
 
 /* given a seeded random engine, fill arrays with random noise */
 void um_set_noise(std::default_random_engine *g, double mean, double std_dev, int length, double *cn1, double *cn2);
@@ -156,7 +192,21 @@ void direct_britton_set_noise(std::default_random_engine *g,
                      double *cn_l1,
                      double *cn_l2);
 
+void gaze_set_noise(std::default_random_engine *g,
+                    double mean,
+                    double n_std_dev,
+                    int length,
+                    double *n_I1,
+                    double *n_I2,
+                    double *n_w1,
+                    double *n_w2,
+                    double *n_g1,
+                    double *n_g2,
+                    double *n_l1,
+                    double *n_l2);
+
 /* the numerical approximations */
+void usher_mcclelland_eulers(params_um_t *params, double *results_y1, double *results_y2);
 void usher_mcclelland_rk4(params_um_t *params, double * results_y1, double * results_y2);
 
 void pratt_rk4(params_pratt_t *params, double * results_y1, double * results_y2);
@@ -168,5 +218,7 @@ double indirect_britton_s(double s, double y1, double y2);
 
 void direct_britton_rk4(params_direct_britton_t *params, double * results_y1, double * results_y2);
 double direct_britton_s(double s, double y1, double y2);
+
+void gaze_rk4(std::default_random_engine *g, params_gaze_t * params, double *results_y1, double *results_y2);
 
 #endif // MODELS_H

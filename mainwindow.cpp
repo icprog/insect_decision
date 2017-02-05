@@ -2,6 +2,7 @@
 #include "chart_pratt.h"
 #include "chart_indirect_britton.h"
 #include "chart_direct_britton.h"
+#include "chart_gaze.h"
 #include "mainwindow.h"
 #include "models.h"
 
@@ -16,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     pratt_set_defaults(&params_pratt);
     indirect_britton_set_defaults(&params_indirect_britton);
     direct_britton_set_defaults(&params_direct_britton);
+    gaze_set_defaults(&params_gaze);
 
     /* set default window size */
     setFixedWidth(700);
@@ -37,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     /* stick the layout in this widget (i.e., this window) and make it appear */
     setLayout(main_layout);
-    setWindowTitle(tr("Insert something catchy"));
+    setWindowTitle(tr("Dynamical Binary Decision Models"));
     show();
 }
 
@@ -67,12 +69,15 @@ void MainWindow::create_combo_menu_box()
     action_indirect_britton->setText("Simplified indirect Britton model");
     action_direct_britton = new QAction(this);
     action_direct_britton->setText("Simplified direct Britton model");
+    action_gaze = new QAction(this);
+    action_gaze->setText("Gaze model");
 
     combo_menu = new QComboBox(this);
     combo_menu->addItem(action_um->text(), QVariant::fromValue(action_um));
     combo_menu->addItem(action_pratt->text(), QVariant::fromValue(action_pratt));
     combo_menu->addItem(action_indirect_britton->text(), QVariant::fromValue(action_indirect_britton));
     combo_menu->addItem(action_direct_britton->text(), QVariant::fromValue(action_direct_britton));
+    combo_menu->addItem(action_gaze->text(), QVariant::fromValue(action_gaze));
 
     layout->addWidget(combo_menu);
     combo_menu_box->setLayout(layout);
@@ -108,12 +113,20 @@ void MainWindow::create_model_box()
     create_model_box_pratt();
     create_model_box_indirect_britton();
     create_model_box_direct_britton();
+    create_model_box_gaze();
 
     model_box->addWidget(model_box_um);
     model_box->addWidget(model_box_pratt);
     model_box->addWidget(model_box_indirect_britton);
     model_box->addWidget(model_box_direct_britton);
+    model_box->addWidget(model_box_gaze);
 }
+
+/**************************************************************
+ *
+ * Usher-McClelland Model GUI Box
+ *
+ **************************************************************/
 
 void MainWindow::create_model_box_um()
 {
@@ -267,7 +280,9 @@ void MainWindow::slot_um_std_dev_changed(double v) {
 }
 
 /**************************************************************
+ *
  * Simplified Pratt Model GUI Box
+ *
  **************************************************************/
 void MainWindow::create_model_box_pratt()
 {
@@ -527,42 +542,42 @@ void MainWindow::create_model_box_indirect_britton()
     sb_population->setValue(params_indirect_britton.population);
 
     QDoubleSpinBox * sb_y1_0 = new QDoubleSpinBox();
-    sb_y1_0->setSingleStep(1.0);
-    sb_y1_0->setDecimals(1);
+    sb_y1_0->setSingleStep(0.01);
+    sb_y1_0->setDecimals(3);
     sb_y1_0->setValue(params_indirect_britton.y1_0);
 
     QDoubleSpinBox * sb_y2_0 = new QDoubleSpinBox();
-    sb_y2_0->setSingleStep(1.0);
-    sb_y2_0->setDecimals(1);
+    sb_y2_0->setSingleStep(0.01);
+    sb_y2_0->setDecimals(3);
     sb_y2_0->setValue(params_indirect_britton.y2_0);
 
     QDoubleSpinBox * sb_q1 = new QDoubleSpinBox();
-    sb_q1->setSingleStep(0.1);
+    sb_q1->setSingleStep(0.01);
     sb_q1->setDecimals(3);
     sb_q1->setValue(params_indirect_britton.q1);
 
     QDoubleSpinBox * sb_q2 = new QDoubleSpinBox();
-    sb_q2->setSingleStep(0.1);
+    sb_q2->setSingleStep(0.01);
     sb_q2->setDecimals(3);
     sb_q2->setValue(params_indirect_britton.q2);
 
     QDoubleSpinBox * sb_l1 = new QDoubleSpinBox();
-    sb_l1->setSingleStep(0.1);
+    sb_l1->setSingleStep(0.01);
     sb_l1->setDecimals(3);
     sb_l1->setValue(params_indirect_britton.l1);
 
     QDoubleSpinBox * sb_l2 = new QDoubleSpinBox();
-    sb_l2->setSingleStep(0.1);
+    sb_l2->setSingleStep(0.01);
     sb_l2->setDecimals(3);
     sb_l2->setValue(params_indirect_britton.l2);
 
     QDoubleSpinBox * sb_r1_prime = new QDoubleSpinBox();
-    sb_r1_prime->setSingleStep(0.1);
+    sb_r1_prime->setSingleStep(0.01);
     sb_r1_prime->setDecimals(3);
     sb_r1_prime->setValue(params_indirect_britton.r1_prime);
 
     QDoubleSpinBox * sb_r2_prime = new QDoubleSpinBox();
-    sb_r2_prime->setSingleStep(0.1);
+    sb_r2_prime->setSingleStep(0.01);
     sb_r2_prime->setDecimals(3);
     sb_r2_prime->setValue(params_indirect_britton.r2_prime);
 
@@ -572,7 +587,7 @@ void MainWindow::create_model_box_indirect_britton()
     sb_seed->setValue(params_indirect_britton.seed);
 
     QDoubleSpinBox * sb_std_dev = new QDoubleSpinBox();
-    sb_std_dev->setSingleStep(0.1);
+    sb_std_dev->setSingleStep(0.01);
     sb_std_dev->setDecimals(3);
     sb_std_dev->setRange(0,999.00);
     sb_std_dev->setValue(params_indirect_britton.std_dev);
@@ -724,10 +739,12 @@ void MainWindow::create_model_box_direct_britton()
 
     QDoubleSpinBox * sb_y1_0 = new QDoubleSpinBox();
     sb_y1_0->setSingleStep(0.01);
+    sb_y1_0->setDecimals(3);
     sb_y1_0->setValue(params_direct_britton.y1_0);
 
     QDoubleSpinBox * sb_y2_0 = new QDoubleSpinBox();
     sb_y2_0->setSingleStep(0.01);
+    sb_y2_0->setDecimals(3);
     sb_y2_0->setValue(params_direct_britton.y2_0);
 
     QDoubleSpinBox * sb_q1 = new QDoubleSpinBox();
@@ -896,6 +913,296 @@ void MainWindow::slot_sdb_std_dev_changed(double v) {
 
 /**************************************************************
  *
+ * Gaze Model GUI Box
+ *
+ **************************************************************/
+void MainWindow::create_model_box_gaze()
+{
+    model_box_gaze = new QGroupBox(tr("Gaze model parameters:"));
+    QGridLayout *layout = new QGridLayout;
+
+    QLabel *label_h = new QLabel("Step size:");
+    QLabel *label_d = new QLabel("Duration:");
+    QLabel *label_y1_0 = new QLabel("y1 initial size:");
+    QLabel *label_y2_0 = new QLabel("y2 initial size:");
+    QLabel *label_I1 = new QLabel("y1 input:");
+    QLabel *label_I2 = new QLabel("y2 input:");
+    QLabel *label_g = new QLabel("gaze input:");
+    QLabel *label_gaze_start = new QLabel("gaze start:");
+    QLabel *label_gaze_end = new QLabel("gaze end:");
+    QLabel *label_a = new QLabel("y-intercept:");
+    QLabel *label_l1 = new QLabel("y1 leak rate:");
+    QLabel *label_l2 = new QLabel("y2 leak rate:");
+    QLabel *label_w1 = new QLabel("y1->y2 weight:");
+    QLabel *label_w2 = new QLabel("y2->y1 weight:");
+    QLabel *label_t1 = new QLabel("target 1 location:");
+    QLabel *label_t2 = new QLabel("target 2 location:");
+    QLabel *label_tg = new QLabel("gaze location:");
+    QLabel *label_seed = new QLabel("Noise seed:");
+    QLabel *label_n_std_dev = new QLabel("Noise std deviation:");
+    QLabel *label_g_std_dev = new QLabel("Gaze std deviation");
+
+    /* spinboxes */
+    QDoubleSpinBox * sb_h = new QDoubleSpinBox();
+    sb_h->setSingleStep(0.01);
+    sb_h->setDecimals(3);
+    sb_h->setValue(params_gaze.h);
+
+    QSpinBox * sb_d = new QSpinBox();
+    sb_d->setSingleStep(1);
+    sb_d->setRange(0,999);
+    sb_d->setValue(params_gaze.d);
+
+    QDoubleSpinBox * sb_y1_0 = new QDoubleSpinBox();
+    sb_y1_0->setSingleStep(0.01);
+    sb_y1_0->setDecimals(3);
+    sb_y1_0->setValue(params_gaze.y1_0);
+
+    QDoubleSpinBox * sb_y2_0 = new QDoubleSpinBox();
+    sb_y2_0->setSingleStep(0.01);
+    sb_y2_0->setDecimals(3);
+    sb_y2_0->setValue(params_gaze.y2_0);
+
+    QDoubleSpinBox * sb_I1 = new QDoubleSpinBox();
+    sb_I1->setSingleStep(0.01);
+    sb_I1->setDecimals(3);
+    sb_I1->setValue(params_gaze.I1);
+
+    QDoubleSpinBox * sb_I2 = new QDoubleSpinBox();
+    sb_I2->setSingleStep(0.01);
+    sb_I2->setDecimals(3);
+    sb_I2->setValue(params_gaze.I2);
+
+    QDoubleSpinBox * sb_g = new QDoubleSpinBox();
+    sb_g->setSingleStep(0.01);
+    sb_g->setDecimals(3);
+    sb_g->setValue(params_gaze.g);
+
+    /* bounds testing is currently taken care of during graphing */
+    QDoubleSpinBox * sb_gaze_start = new QDoubleSpinBox();
+    sb_gaze_start->setSingleStep(0.01);
+    sb_gaze_start->setDecimals(3);
+    sb_gaze_start->setRange(0.0,params_gaze.d);
+    sb_gaze_start->setValue(params_gaze.gaze_start);
+
+    QDoubleSpinBox * sb_gaze_end = new QDoubleSpinBox();
+    sb_gaze_end->setSingleStep(0.01);
+    sb_gaze_end->setDecimals(3);
+    sb_gaze_end->setRange(0.0, params_gaze.d);
+    sb_gaze_end->setValue(params_gaze.gaze_end);
+
+    QDoubleSpinBox * sb_a = new QDoubleSpinBox();
+    sb_a->setSingleStep(0.01);
+    sb_a->setDecimals(3);
+    sb_a->setValue(params_gaze.a);
+
+    QDoubleSpinBox * sb_l1 = new QDoubleSpinBox();
+    sb_l1->setSingleStep(0.01);
+    sb_l1->setDecimals(3);
+    sb_l1->setValue(params_gaze.l1);
+
+    QDoubleSpinBox * sb_l2 = new QDoubleSpinBox();
+    sb_l2->setSingleStep(0.01);
+    sb_l2->setDecimals(3);
+    sb_l2->setValue(params_gaze.l2);
+
+    QDoubleSpinBox * sb_w1 = new QDoubleSpinBox();
+    sb_w1->setSingleStep(0.01);
+    sb_w1->setDecimals(3);
+    sb_w1->setValue(params_gaze.w1);
+
+    QDoubleSpinBox * sb_w2 = new QDoubleSpinBox();
+    sb_w2->setSingleStep(0.01);
+    sb_w2->setDecimals(3);
+    sb_w2->setValue(params_gaze.w2);
+
+    QDoubleSpinBox * sb_t1 = new QDoubleSpinBox();
+    sb_t1->setSingleStep(1.0);
+    sb_t1->setDecimals(3);
+    sb_t1->setRange(0.0,90.0);
+    sb_t1->setValue(params_gaze.t1);
+
+    QDoubleSpinBox * sb_t2 = new QDoubleSpinBox();
+    sb_t2->setSingleStep(1.0);
+    sb_t2->setDecimals(3);
+    sb_t2->setRange(90.0,180.0);
+    sb_t2->setValue(params_gaze.t2);
+
+    QDoubleSpinBox * sb_tg = new QDoubleSpinBox();
+    sb_tg->setSingleStep(1.0);
+    sb_tg->setDecimals(3);
+    sb_tg->setRange(0.0,180.0);
+    sb_tg->setValue(params_gaze.tg);
+
+    QSpinBox * sb_seed = new QSpinBox();
+    sb_seed->setSingleStep(1);
+    sb_seed->setRange(0,10000);
+    sb_seed->setValue(params_gaze.seed);
+
+    QDoubleSpinBox * sb_n_std_dev = new QDoubleSpinBox();
+    sb_n_std_dev->setSingleStep(0.01);
+    sb_n_std_dev->setDecimals(3);
+    sb_n_std_dev->setRange(0,999.00);
+    sb_n_std_dev->setValue(params_gaze.n_std_dev);
+
+    QDoubleSpinBox * sb_g_std_dev = new QDoubleSpinBox();
+    sb_g_std_dev->setSingleStep(0.01);
+    sb_g_std_dev->setDecimals(3);
+    sb_g_std_dev->setRange(0,999.00);
+    sb_g_std_dev->setValue(params_gaze.g_std_dev);
+
+    /* put the labels and spinboxes in the rows, cols */
+    /* cols 1 & 2 */
+    layout->addWidget(label_h, 0, 0);
+    layout->addWidget(sb_h, 0, 1);
+    layout->addWidget(label_d, 1, 0);
+    layout->addWidget(sb_d, 1, 1);
+    layout->addWidget(label_y1_0, 2, 0);
+    layout->addWidget(sb_y1_0, 2, 1);
+    layout->addWidget(label_y2_0, 3, 0);
+    layout->addWidget(sb_y2_0, 3, 1);
+    layout->addWidget(label_I1, 4, 0);
+    layout->addWidget(sb_I1, 4, 1);
+    layout->addWidget(label_I2, 5, 0);
+    layout->addWidget(sb_I2, 5, 1);
+    layout->addWidget(label_g, 6, 0);
+    layout->addWidget(sb_g, 6, 1);
+    layout->addWidget(label_gaze_start, 7, 0);
+    layout->addWidget(sb_gaze_start, 7, 1);
+    layout->addWidget(label_gaze_end, 8, 0);
+    layout->addWidget(sb_gaze_end, 8, 1);
+    layout->addWidget(label_a, 9, 0);
+    layout->addWidget(sb_a, 9, 1);
+    /* cols 3 & 4 */
+    layout->addWidget(label_l1, 0, 2);
+    layout->addWidget(sb_l1, 0, 3);
+    layout->addWidget(label_l2, 1, 2);
+    layout->addWidget(sb_l2, 1, 3);
+    layout->addWidget(label_w1, 2, 2);
+    layout->addWidget(sb_w1, 2, 3);
+    layout->addWidget(label_w2, 3, 2);
+    layout->addWidget(sb_w2, 3, 3);
+    layout->addWidget(label_t1, 4, 2);
+    layout->addWidget(sb_t1, 4, 3);
+    layout->addWidget(label_t2, 5, 2);
+    layout->addWidget(sb_t2, 5, 3);
+    layout->addWidget(label_tg, 6, 2);
+    layout->addWidget(sb_tg, 6, 3);
+    layout->addWidget(label_seed, 7, 2);
+    layout->addWidget(sb_seed, 7, 3);
+    layout->addWidget(label_n_std_dev, 8, 2);
+    layout->addWidget(sb_n_std_dev, 8, 3);
+    layout->addWidget(label_g_std_dev, 9, 2);
+    layout->addWidget(sb_g_std_dev, 9, 3);
+
+    layout->setColumnStretch(1, 10);
+    layout->setColumnStretch(3, 20);
+    model_box_gaze->setLayout(layout);
+
+    connect(sb_h, SIGNAL(valueChanged(double)), this, SLOT(slot_g_h_changed(double)));
+    connect(sb_d, SIGNAL(valueChanged(int)), this, SLOT(slot_g_d_changed(int)));
+    connect(sb_y1_0, SIGNAL(valueChanged(double)), this, SLOT(slot_g_y1_0_changed(double)));
+    connect(sb_y2_0, SIGNAL(valueChanged(double)), this, SLOT(slot_g_y2_0_changed(double)));
+    connect(sb_I1, SIGNAL(valueChanged(double)), this, SLOT(slot_g_I1_changed(double)));
+    connect(sb_I2, SIGNAL(valueChanged(double)), this, SLOT(slot_g_I2_changed(double)));
+    connect(sb_g, SIGNAL(valueChanged(double)), this, SLOT(slot_g_g_changed(double)));
+    connect(sb_gaze_start, SIGNAL(valueChanged(double)), this, SLOT(slot_g_gaze_start_changed(double)));
+    connect(sb_gaze_end, SIGNAL(valueChanged(double)), this, SLOT(slot_g_gaze_end_changed(double)));
+    connect(sb_a, SIGNAL(valueChanged(double)), this, SLOT(slot_g_a_changed(double)));
+    connect(sb_l1, SIGNAL(valueChanged(double)), this, SLOT(slot_g_l1_changed(double)));
+    connect(sb_l2, SIGNAL(valueChanged(double)), this, SLOT(slot_g_l2_changed(double)));
+    connect(sb_w1, SIGNAL(valueChanged(double)), this, SLOT(slot_g_w1_changed(double)));
+    connect(sb_w2, SIGNAL(valueChanged(double)), this, SLOT(slot_g_w2_changed(double)));
+    connect(sb_t1, SIGNAL(valueChanged(double)), this, SLOT(slot_g_t1_changed(double)));
+    connect(sb_t2, SIGNAL(valueChanged(double)), this, SLOT(slot_g_t2_changed(double)));
+    connect(sb_tg, SIGNAL(valueChanged(double)), this, SLOT(slot_g_tg_changed(double)));
+    connect(sb_seed, SIGNAL(valueChanged(int)), this, SLOT(slot_g_seed_changed(int)));
+    connect(sb_n_std_dev, SIGNAL(valueChanged(double)), this, SLOT(slot_g_n_std_dev_changed(double)));
+    connect(sb_g_std_dev, SIGNAL(valueChanged(double)), this, SLOT(slot_g_g_std_dev_changed(double)));
+}
+
+void MainWindow::slot_g_h_changed(double v) {
+    params_gaze.h = v;
+}
+
+void MainWindow::slot_g_d_changed(int v) {
+    params_gaze.d = v;
+}
+
+void MainWindow::slot_g_y1_0_changed(double v) {
+    params_gaze.y1_0 = v;
+}
+
+void MainWindow::slot_g_y2_0_changed(double v) {
+    params_gaze.y2_0 = v;
+}
+
+void MainWindow::slot_g_I1_changed(double v) {
+    params_gaze.I1 = v;
+}
+
+void MainWindow::slot_g_I2_changed(double v) {
+    params_gaze.I2 = v;
+}
+
+void MainWindow::slot_g_g_changed(double v) {
+    params_gaze.g = v;
+}
+
+void MainWindow::slot_g_gaze_start_changed(double v) {
+    params_gaze.gaze_start = v;
+}
+
+void MainWindow::slot_g_gaze_end_changed(double v) {
+    params_gaze.gaze_end = v;
+}
+
+void MainWindow::slot_g_a_changed(double v) {
+    params_gaze.a = v;
+}
+
+void MainWindow::slot_g_l1_changed(double v) {
+    params_gaze.l1 = v;
+}
+
+void MainWindow::slot_g_l2_changed(double v) {
+    params_gaze.l2 = v;
+}
+
+void MainWindow::slot_g_w1_changed(double v) {
+    params_gaze.w1 = v;
+}
+
+void MainWindow::slot_g_w2_changed(double v) {
+    params_gaze.w2 = v;
+}
+
+void MainWindow::slot_g_t1_changed(double v) {
+    params_gaze.t1 = v;
+}
+
+void MainWindow::slot_g_t2_changed(double v) {
+    params_gaze.t2 = v;
+}
+
+void MainWindow::slot_g_tg_changed(double v) {
+    params_gaze.tg = v;
+}
+
+void MainWindow::slot_g_seed_changed(int v) {
+    params_gaze.seed = v;
+}
+
+void MainWindow::slot_g_n_std_dev_changed(double v) {
+    params_gaze.n_std_dev = v;
+}
+
+void MainWindow::slot_g_g_std_dev_changed(double v) {
+    params_gaze.g_std_dev = v;
+}
+
+/**************************************************************
+ *
  * Other Slots
  *
  **************************************************************/
@@ -917,6 +1224,11 @@ void MainWindow::slot_go_indirect_britton() {
 
 void MainWindow::slot_go_direct_britton() {
     ChartDirectBritton *chart = new ChartDirectBritton(&params_direct_britton);
+    chart->show();
+}
+
+void MainWindow::slot_go_gaze() {
+    ChartGaze *chart = new ChartGaze(&params_gaze);
     chart->show();
 }
 
@@ -942,6 +1254,11 @@ void MainWindow::slot_model_changed(int index)
             model_box->setCurrentWidget(model_box_direct_britton);
             disconnect(m_button_go, SIGNAL(clicked(bool)), 0, 0);
             connect(m_button_go, SIGNAL(clicked(bool)), this, SLOT(slot_go_direct_britton()));
+            break;
+        case MODEL_GAZE:
+            model_box->setCurrentWidget(model_box_gaze);
+            disconnect(m_button_go, SIGNAL(clicked(bool)), 0, 0);
+            connect(m_button_go, SIGNAL(clicked(bool)), this, SLOT(slot_go_gaze()));
             break;
         default:
             // TODO: Handle this in GUI

@@ -29,6 +29,7 @@ private:
     void create_model_box_pratt();
     void create_model_box_indirect_britton();
     void create_model_box_direct_britton();
+    void create_model_box_gaze();
 
     /* window component: menu bar */
     QMenuBar *menuBar;  /* note: apparently on mac/osx the quit action always defaults to the name of the program */
@@ -36,13 +37,14 @@ private:
     QAction *exitAction;
 
     /* window component: combo menu box for selecting model */
-    enum {MODEL_UM = 0, MODEL_PRATT, MODEL_INDIRECT_BRITTON, MODEL_DIRECT_BRITTON};
+    enum {MODEL_UM = 0, MODEL_PRATT, MODEL_INDIRECT_BRITTON, MODEL_DIRECT_BRITTON, MODEL_GAZE};
     QGroupBox *combo_menu_box;
     QComboBox *combo_menu;
     QAction *action_um;
     QAction *action_pratt;
     QAction *action_indirect_britton;
     QAction *action_direct_britton;
+    QAction *action_gaze;
 
     /* window component: button box for actions such as graph or quit */
     QGroupBox *action_box;
@@ -54,12 +56,14 @@ private:
     QGroupBox *model_box_pratt; /* the simplified pratt model box */
     QGroupBox *model_box_indirect_britton;  /* the simplified indirect britton box */
     QGroupBox *model_box_direct_britton;
+    QGroupBox *model_box_gaze;
 
     /* model parameters */
     params_um_t params_um;          /* usher-mclelland binary decision */
     params_pratt_t params_pratt;    /* simplified pratt model: social insect, direct switching */
     params_indirect_britton_t params_indirect_britton;
     params_direct_britton_t params_direct_britton;
+    params_gaze_t params_gaze;
 
     /* buttons */
     /* Q: should these be defined here or in the action box?
@@ -133,11 +137,34 @@ private slots:
     void slot_sdb_seed_changed(int v);
     void slot_sdb_std_dev_changed(double v);
 
+    /* gaze model changes to spinboxes */
+    void slot_g_h_changed(double v);
+    void slot_g_d_changed(int v);
+    void slot_g_y1_0_changed(double v);
+    void slot_g_y2_0_changed(double v);
+    void slot_g_I1_changed(double v);
+    void slot_g_I2_changed(double v);
+    void slot_g_g_changed(double v);
+    void slot_g_gaze_start_changed(double v);
+    void slot_g_gaze_end_changed(double v);
+    void slot_g_a_changed(double v);
+    void slot_g_l1_changed(double v);
+    void slot_g_l2_changed(double v);
+    void slot_g_w1_changed(double v);
+    void slot_g_w2_changed(double v);
+    void slot_g_t1_changed(double v);
+    void slot_g_t2_changed(double v);
+    void slot_g_tg_changed(double v);
+    void slot_g_n_std_dev_changed(double v);
+    void slot_g_g_std_dev_changed(double v);
+    void slot_g_seed_changed(int v);
+
     /* slots for handling the charting of the different models */
     void slot_go_um();
     void slot_go_pratt();
     void slot_go_indirect_britton();
     void slot_go_direct_britton();
+    void slot_go_gaze();
 
     void slot_model_changed(int);
 };

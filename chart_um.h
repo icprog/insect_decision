@@ -8,6 +8,8 @@
 #include <QFlags>
 #include <QGroupBox>
 #include <QLineSeries>
+#include <QPrinter>
+#include <QPrintDialog>
 #include <QPushButton>
 #include <QValueAxis>
 #include <QVBoxLayout>
@@ -25,12 +27,16 @@ private:
     params_um_t *params;
 
     /* simulation results */
-    double * results_y1;
-    double * results_y2;
+    double *results_y1;
+    double *results_y2;
+
+    /* window component: the chart */
+    QtCharts::QChartView *chart_view;
 
     /* window component: button_box */
     QGroupBox *button_box;
-    QPushButton * m_button_close;
+    QPushButton *m_button_close;
+    QPushButton *m_button_print;
 
 signals:
 
@@ -38,6 +44,7 @@ public slots:
 
 private slots:
     void slot_close();
+    void slot_print();
 };
 
 #endif // CHART_UM_H

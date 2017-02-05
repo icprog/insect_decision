@@ -12,7 +12,7 @@ ChartUM::ChartUM(params_um_t *p, QWidget *parent)
     /* populate noise arrays using seed */
     // if we wanted a seed from time: unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(params->seed);
-    int length = (int)(params->d/params->h);
+    int length = ceil(params->d/params->h);
     params->cn1 = (double *)malloc(length * sizeof(*(params->cn1)));
     params->cn2 = (double *)malloc(length * sizeof(*(params->cn2)));
     um_set_noise(&generator, 0.0, params->std_dev, length, params->cn1, params->cn2);
@@ -21,8 +21,9 @@ ChartUM::ChartUM(params_um_t *p, QWidget *parent)
     results_y1 = (double *)malloc(length * sizeof(*results_y1));
     results_y2 = (double *)malloc(length * sizeof(*results_y2));
 
-    // note: function call will set initial conditions
+    /* note: function call sets initial conditions */
     usher_mcclelland_rk4(params, results_y1, results_y2);
+    //usher_mcclelland_eulers(params, results_y1, results_y2);
 
     /* create series to chart */
     double t;
@@ -38,9 +39,9 @@ ChartUM::ChartUM(params_um_t *p, QWidget *parent)
     }
 
     /* set series options */
-    series1->setName("Option A");
-    series2->setName("Option B");
-    series_diff->setName("A-B");
+    series1->setName("y1 activation");
+    series2->setName("y2 activation");
+    series_diff->setName("y1-y2");
 
     QPen diff_pen(QRgb(0xff9933));
     diff_pen.setWidth(2);
@@ -49,9 +50,8 @@ ChartUM::ChartUM(params_um_t *p, QWidget *parent)
 
     /* create chart */
     QtCharts::QChart *chart = new QtCharts::QChart();
-    //chart->legend()->hide();
     chart->legend()->setVisible(true);
-    chart->setTitle("Usher-McClelland Model");
+    //chart->setTitle("Usher-McClelland Model");
 
     /* this will animate the series as it is displayed */
     chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
@@ -61,16 +61,18 @@ ChartUM::ChartUM(params_um_t *p, QWidget *parent)
     /* time axis */
     QtCharts::QValueAxis *axisX = new QtCharts::QValueAxis;
     axisX->setTitleText("Time");
+    axisX->setGridLineVisible(false);
 
     /* activation axis */
     QtCharts::QValueAxis *axisY = new QtCharts::QValueAxis;
     axisY->setRange(-1.0,1.0);
     axisY->setTitleText("Activation");
+    axisY->setGridLineVisible(false);
 
     /* region axis */
     QtCharts::QCategoryAxis *axisY2 = new QtCharts::QCategoryAxis;
-    axisY2->append("Option B Wins", 2);
-    axisY2->append("Option A Wins", 4);
+    axisY2->append("y2", 2);
+    axisY2->append("y1", 4);
     axisY2->setRange(0,4);
     axisY2->setLinePenColor(series_diff->pen().color());
     //axisY3->setGridLinePen((series->pen()));
@@ -94,15 +96,16 @@ ChartUM::ChartUM(params_um_t *p, QWidget *parent)
     series_diff->attachAxis(axisY);
     series_diff->attachAxis(axisX);
 
-
     /* chart view goes on top */
-    QtCharts::QChartView *chart_view = new QtCharts::QChartView(chart);
+    chart_view = new QtCharts::QChartView(chart);
     chart_view->setRenderHint(QPainter::Antialiasing);
 
     /* button box comes next */
     button_box = new QGroupBox;
     QHBoxLayout *button_layout = new QHBoxLayout;
     m_button_close = new QPushButton("close", this);
+    m_button_print = new QPushButton("print", this);
+    button_layout->addWidget(m_button_print);
     button_layout->addWidget(m_button_close);
     button_box->setLayout(button_layout);
 
@@ -116,6 +119,7 @@ ChartUM::ChartUM(params_um_t *p, QWidget *parent)
     show();
 
     /* wire the signals */
+    connect(m_button_print, SIGNAL (clicked()), this, SLOT(slot_print()));
     connect(m_button_close, SIGNAL (clicked()), this, SLOT(slot_close()));
 }
 
@@ -127,3 +131,22 @@ void ChartUM::slot_close() {
     this->close();
 }
 
+void ChartUM::slot_print() {
+    /* create a printer */
+    QPrinter *printer = new QPrinter(QPrinter::HighResolution);
+    //printer->setOrientation(QPrinter::Landscape);
+    QPrintDialog *dialog = new QPrintDialog(printer);
+    dialog->setWindowTitle("Print Chart");
+    if (dialog->exec() != QDialog::Accepted)
+        return;
+
+    /* make a painter to paint onto the pages of the printer */
+    QPainter *painter = new QPainter();
+    painter->begin(printer);
+    painter->setRenderHint(QPainter::Antialiasing);
+    chart_view->render(painter, printer->pageRect());
+    painter->end();
+    delete(dialog);
+    delete(painter);
+    delete(printer);
+}

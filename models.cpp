@@ -29,14 +29,35 @@ void um_set_noise(std::default_random_engine *g, double mean, double std_dev, in
     std::normal_distribution<double> distribution(mean,std_dev);
     for (int i=0; i<length; i++) {
         cn1[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn2[i] = distribution(*g);
     }
 }
 
+void usher_mcclelland_eulers(params_um_t *params, double *results_y1, double *results_y2) {
+    int length = ceil(params->d/params->h);
+
+    /* set initial conditions */
+    results_y1[0] = params->y1_0;
+    results_y2[0] = params->y2_0;
+
+    int i;
+    for (i=0;i<length-1;i++) {
+        double y1_k1 = params->I1
+                + params->cn1[i]
+                - (params->l1 * results_y1[i])
+                - (params->w2 * results_y2[i]);
+        double y2_k1 = params->I2
+                + params->cn2[i]
+                - (params->l2 * results_y2[i])
+                - (params->w1 * results_y1[i]);
+        results_y1[i+1] = results_y1[i] + (y1_k1 * params->h);
+        results_y2[i+1] = results_y2[i] + (y2_k1 * params->h);
+    }
+}
+
 void usher_mcclelland_rk4(params_um_t *params, double * results_y1, double * results_y2) {
-    int length = (int)(params->d/params->h);
+
+    int length = ceil(params->d/params->h);
 
     /* set initial conditions */
     results_y1[0] = params->y1_0;
@@ -133,26 +154,12 @@ void pratt_set_noise(std::default_random_engine *g,
 
     for (int i=0; i<length; i++) {
         cn_q1[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_q2[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_r1[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_r2[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_r1_prime[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_r2_prime[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_l1[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_l2[i] = distribution(*g);
     }
 }
@@ -188,7 +195,7 @@ double pratt_s(double total_population, double y1, double y2) {
 
 void pratt_rk4(params_pratt_t *params, double * results_y1, double * results_y2) {
 
-    int length = (int)(params->d/params->h);
+    int length = ceil(params->d/params->h);
 
     /* set initial conditions */
     results_y1[0] = params->y1_0;
@@ -253,9 +260,6 @@ void pratt_rk4(params_pratt_t *params, double * results_y1, double * results_y2)
                 + ((results_y1[i] + (y1_k3 * params->h)) * (params->r1 + params->cn_r1[i]))
                 - ((results_y2[i] + (y2_k3 * params->h)) * (params->r2 + params->cn_r2[i]))
                 - ((results_y2[i] + (y2_k3 * params->h)) * (params->l2 + params->cn_l2[i])));
-        /* Euler's method */
-//        results_y1[i+1] = results_y1[i] + (y1_k1 * params->h);
-//        results_y2[i+1] = results_y2[i] + (y2_k1 * params->h);
         /* RK4 method */
         results_y1[i+1] = results_y1[i] + (((y1_k1 + 2*y1_k2 + 2*y1_k3 + y1_k4)/6)*params->h);
         results_y2[i+1] = results_y2[i] + (((y2_k1 + 2*y2_k2 + 2*y2_k3 + y2_k4)/6)*params->h);
@@ -308,20 +312,10 @@ void indirect_britton_set_noise(std::default_random_engine *g,
 
     for (int i=0; i<length; i++) {
         cn_q1[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_q2[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_r1_prime[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_r2_prime[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_l1[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_l2[i] = distribution(*g);
     }
 }
@@ -342,7 +336,7 @@ double indirect_britton_s(double total_population, double y1, double y2) {
 
 void indirect_britton_rk4(params_indirect_britton_t *params, double * results_y1, double * results_y2) {
 
-    int length = (int)(params->d/params->h);
+    int length = ceil(params->d/params->h);
 
     /* set initial conditions */
     results_y1[0] = params->y1_0;
@@ -436,26 +430,12 @@ void direct_britton_set_noise(std::default_random_engine *g,
 
     for (int i=0; i<length; i++) {
         cn_q1[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_q2[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_r1[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_r2[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_r1_prime[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_r2_prime[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_l1[i] = distribution(*g);
-    }
-    for (int i=0; i<length; i++) {
         cn_l2[i] = distribution(*g);
     }
 }
@@ -476,7 +456,7 @@ double direct_britton_s(double total_population, double y1, double y2) {
 
 void direct_britton_rk4(params_direct_britton_t *params, double * results_y1, double * results_y2) {
 
-    int length = (int)(params->d/params->h);
+    int length = ceil(params->d/params->h);
 
     /* set initial conditions */
     results_y1[0] = params->y1_0;
@@ -525,3 +505,137 @@ void direct_britton_rk4(params_direct_britton_t *params, double * results_y1, do
         results_y2[i+1] = results_y2[i] + (((y2_k1 + 2*y2_k2 + 2*y2_k3 + y2_k4)/6)*params->h);
     }
 }
+
+/*****************************************************************************
+ *
+ * Gaze Model
+ *
+ * Currently calculates gaze input as a linear function of the distince
+ * of the gaze from each target.
+ *
+ *****************************************************************************/
+void gaze_set_defaults(params_gaze_t *p) {
+    p->h = 0.2;
+    p->d = 30;
+    p->y1_0 = 0.0;
+    p->y2_0 = 0.0;
+    p->I1 = 0.05;
+    p->I2 = 0.05;
+    p->g = 0.0;
+    p->gaze_start = 0.0;
+    p->gaze_end = 0.0;
+    p->l1 = 0.2;
+    p->l2 = p->l1;
+    p->w1 = 0.3;
+    p->w2 = p->w1;
+    p->t1 = 45.0;
+    p->t2 = 135.0;
+    p->tg = p->t1;
+    p->a = 5;
+    p->n_std_dev = 0.1;
+    p->g_std_dev = 0.1;
+    p->seed = 32;
+}
+
+/* Fill the noise arrays for the UM model */
+void gaze_set_noise(std::default_random_engine *g,
+                    double mean,
+                    double n_std_dev,
+                    int length,
+                    double *n_I1,
+                    double *n_I2,
+                    double *n_w1,
+                    double *n_w2,
+                    double *n_g1,
+                    double *n_g2,
+                    double *n_l1,
+                    double *n_l2)
+{
+    std::normal_distribution<double> distribution(mean,n_std_dev);
+    for (int i=0; i<length; i++) {
+        n_I1[i] = distribution(*g);
+        n_I2[i] = distribution(*g);
+        n_w1[i] = distribution(*g);
+        n_w2[i] = distribution(*g);
+        n_g1[i] = distribution(*g);
+        n_g2[i] = distribution(*g);
+        n_l1[i] = distribution(*g);
+        n_l2[i] = distribution(*g);
+    }
+}
+
+void gaze_rk4(std::default_random_engine *g, params_gaze_t *params, double *results_y1, double *results_y2) {
+    int length = ceil(params->d/params->h);
+
+    /* for generating gaze location */
+    std::normal_distribution<double> distribution(0.0,params->g_std_dev);
+    int gs = floor(params->gaze_start/params->h);
+    int ge = floor(params->gaze_end/params->h);
+    double g1 = 0.;
+    double g2 = 0.;
+
+    /* set initial conditions */
+    results_y1[0] = params->y1_0;
+    results_y2[0] = params->y2_0;
+
+    /* outside of gaze interval, the gaze is directed at nothing */
+    int i;
+    for (i=0;i<length-1;i++) {
+        if (i >= gs && i <= ge) {
+            /* gaze is activated */
+            double gaze_offset = distribution(*g);
+            if(params->tg >= params->t1) {
+                g1 = (params->g) * (((-1)/params->a * (params->tg - params->t1 + gaze_offset) + 1));
+            } else {
+                g1 = (params->g) * (((-1)/params->a * (params->t1 - params->tg - gaze_offset) + 1));
+            }
+            if(params->tg >= params->t2) {
+                g2 = (params->g) * (((-1)/params->a * (params->tg - params->t2 + gaze_offset) + 1));
+            } else {
+                g2 = (params->g) * (((-1)/params->a * (params->t2 - params->tg - gaze_offset) + 1));
+            }
+            if (g1 < 0.0) g1 = 0.0;
+            if (g2 < 0.0) g2 = 0.0;
+        } else {
+            /* gaze is not active */
+            g1 = 0.;
+            g2 = 0.;
+        }
+
+        double y1_k1 = (params->I1 + params->n_I1[i])
+                + (g1 + params->n_g1[i])
+                - (params->l1 * results_y1[i])
+                - (params->w2 * results_y2[i]);
+        double y2_k1 = (params->I2 + params->n_I2[i])
+                + (g2 + params->n_g2[i])
+                - (params->l2 * results_y2[i])
+                - (params->w1 * results_y1[i]);
+        double y1_k2 = (params->I1 + params->n_I1[i])
+                + (g1 + params->n_g1[i])
+                - (params->l1 * (results_y1[i] + (y1_k1 * params->h/2)))
+                - (params->w2 * (results_y2[i] + (y2_k1 * params->h/2)));
+        double y2_k2 = (params->I2 + params->n_I2[i])
+                + (g2 + params->n_g2[i])
+                - (params->l2 * (results_y2[i] + (y2_k1 * params->h/2)))
+                - (params->w1 * (results_y1[i] + (y1_k1 * params->h/2)));
+        double y1_k3 = (params->I1 + params->n_I1[i])
+                + (g1 + params->n_g1[i])
+                - (params->l1 * (results_y1[i] + (y1_k2 * params->h/2)))
+                - (params->w2 * (results_y2[i] + (y2_k2 * params->h/2)));
+        double y2_k3 = (params->I2 + params->n_I2[i])
+                + (g2 + params->n_g2[i])
+                - (params->l2 * (results_y2[i] + (y2_k2 * params->h/2)))
+                - (params->w1 * (results_y1[i] + (y1_k2 * params->h/2)));
+        double y1_k4 = (params->I1 + params->n_I1[i])
+                + (g1 + params->n_g1[i])
+                - (params->l1 * (results_y1[i] + (y1_k3 * params->h)))
+                - (params->w2 * (results_y2[i] + (y2_k3 * params->h)));
+        double y2_k4 = (params->I2 + params->n_I2[i])
+                + (g2 + params->n_g2[i])
+                - (params->l2 * (results_y2[i] + (y2_k3 * params->h)))
+                - (params->w1 * (results_y1[i] + (y1_k3 * params->h)));
+        results_y1[i+1] = results_y1[i] + (((y1_k1 + 2*y1_k2 + 2*y1_k3 + y1_k4)/6)*params->h);
+        results_y2[i+1] = results_y2[i] + (((y2_k1 + 2*y2_k2 + 2*y2_k3 + y2_k4)/6)*params->h);
+    }
+}
+
